@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: spring-boot-aufbau-tag6-caching
+  
+  # Cache Configuration
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=100,expireAfterWrite=10m
+    cache-names:
+      - calculations
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, caches, metrics, info
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    caches:
+      enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    de.javafleet: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Server Configuration
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-stacktrace: on_param
+
+# Application Info (für Actuator /info endpoint)
+info:
+  app:
+    name: Spring Boot Aufbau - Tag 6 Caching
+    description: Tag 6 Spring Boot Aufbau Kurs - Calculator Service mit Cache
+    version: 1.0.0
+    author: Elyndra Valen
+    company: Java Fleet Systems Consulting
