@@ -1,7 +1,6 @@
 package de.javafleet.caching.controller;
 
 import de.javafleet.caching.service.CalculatorService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -18,10 +17,20 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/calc")
-@RequiredArgsConstructor
 public class CalculatorController {
     
     private final CalculatorService calculatorService;
+
+    /**
+     * Constructor.
+     * 
+     * @param calculatorService for calculating numbers.
+     */
+    public CalculatorController(CalculatorService calculatorService) {
+        this.calculatorService = calculatorService;
+    }
+    
+    
     
     /**
      * Addition: a + b
