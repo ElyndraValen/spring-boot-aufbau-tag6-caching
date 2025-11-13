@@ -21,7 +21,7 @@ public class CalculatorService {
      * Cache-Key wird automatisch aus Parametern generiert: "a_b"
      * Beispiel: add(10, 20) → Cache-Key: "10.0_20.0"
      */
-    @Cacheable("calculations")
+    @Cacheable(value = "calculations", key = "'add_' + #a + '_' + #b")
     public double add(double a, double b) {
         System.out.println("🔴 BERECHNUNG LÄUFT: " + a + " + " + b);
         simulateLongRunningCalculation();
@@ -31,7 +31,7 @@ public class CalculatorService {
     /**
      * Subtraktion mit Cache
      */
-    @Cacheable("calculations")
+    @Cacheable(value = "calculations", key = "'subtract_' + #a + '_' + #b")
     public double subtract(double a, double b) {
         System.out.println("🔴 BERECHNUNG LÄUFT: " + a + " - " + b);
         simulateLongRunningCalculation();
@@ -41,7 +41,7 @@ public class CalculatorService {
     /**
      * Multiplikation mit Cache
      */
-    @Cacheable("calculations")
+    @Cacheable(value = "calculations", key = "'multiply_' + #a + '_' + #b")
     public double multiply(double a, double b) {
         System.out.println("🔴 BERECHNUNG LÄUFT: " + a + " × " + b);
         simulateLongRunningCalculation();
@@ -51,7 +51,7 @@ public class CalculatorService {
     /**
      * Division mit Cache
      */
-    @Cacheable("calculations")
+    @Cacheable(value = "calculations", key = "'divide_' + #a + '_' + #b")
     public double divide(double a, double b) {
         System.out.println("🔴 BERECHNUNG LÄUFT: " + a + " ÷ " + b);
         if (b == 0) {
@@ -64,7 +64,7 @@ public class CalculatorService {
     /**
      * Potenz mit Cache
      */
-    @Cacheable("calculations")
+    @Cacheable(value = "calculations", key = "'power_' + #a + '_' + #b")
     public double power(double base, double exponent) {
         System.out.println("🔴 BERECHNUNG LÄUFT: " + base + " ^ " + exponent);
         simulateLongRunningCalculation();
