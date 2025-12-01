@@ -400,6 +400,105 @@ Caffeine.newBuilder()
 - 🐛 [Issues melden](https://github.com/java-fleet/spring-boot-caching-demo/issues)
 - 🤝 [Contributing Guidelines](CONTRIBUTING.md)
 
+## 🐛 Übung: Cache-Bug finden
+
+> **Achtung:** Diese Demo enthält einen absichtlichen Bug zum Lernen!
+
+### Das Problem entdecken
+
+Führe folgende Befehle aus und beobachte das Ergebnis:
+
+```bash
+# 1. Addition aufrufen
+curl "http://localhost:8080/calc/add?a=5&b=3"
+# Ergebnis: 8 ✅ (dauert 2 Sekunden)
+
+# 2. Subtraktion mit gleichen Werten aufrufen
+curl "http://localhost:8080/calc/subtract?a=5&b=3"
+# Ergebnis: 8 ❌ (sollte 2 sein! - kommt sofort aus Cache)
+```
+
+**Was ist passiert?**
+
+### Analyse
+
+Alle Methoden im `CalculatorService` nutzen:
+- Denselben Cache-Namen: `"calculations"`
+- Die Standard-Key-Generierung (nur Parameter, NICHT Methodenname!)
+
+```java
+@Cacheable("calculations")
+public double add(double a, double b) { ... }
+
+@Cacheable("calculations")
+public double subtract(double a, double b) { ... }
+```
+
+Der Cache-Key wird nur aus den Parametern generiert:
+- `add(5, 3)` → Key: `SimpleKey[5.0, 3.0]` → Ergebnis: 8 (gecacht)
+- `subtract(5, 3)` → Key: `SimpleKey[5.0, 3.0]` → Ergebnis: 8 (aus Cache!)
+
+### Lösungsansätze
+
+**Lösung A: Separate Caches pro Operation**
+
+```java
+@Cacheable("additions")
+public double add(double a, double b) { ... }
+
+@Cacheable("subtractions")
+public double subtract(double a, double b) { ... }
+```
+
+Bei dieser Lösung muss auch die `CacheConfig` angepasst werden:
+
+```java
+@Bean
+public CacheManager cacheManager() {
+    CaffeineCacheManager cacheManager = new CaffeineCacheManager(
+        "additions",
+        "subtractions",
+        "multiplications",
+        "divisions",
+        "powers"
+    );
+    cacheManager.setCaffeine(Caffeine.newBuilder()
+            .maximumSize(100)
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .recordStats());
+    return cacheManager;
+}
+```
+
+**Lösung B: Custom Key mit SpEL (elegant!)**
+
+```java
+@Cacheable(value = "calculations", key = "#root.methodName + '_' + #a + '_' + #b")
+public double add(double a, double b) { ... }
+```
+
+Hier wird der Methodenname Teil des Keys:
+- `add(5, 3)` → Key: `"add_5.0_3.0"`
+- `subtract(5, 3)` → Key: `"subtract_5.0_3.0"`
+
+**Lösung C: String-Präfix (explizit)**
+
+```java
+@Cacheable(value = "calculations", key = "'add_' + #a + '_' + #b")
+public double add(double a, double b) { ... }
+
+@Cacheable(value = "calculations", key = "'subtract_' + #a + '_' + #b")
+public double subtract(double a, double b) { ... }
+```
+
+### Diskussionsfragen
+
+1. Welche Lösung ist am wartbarsten?
+2. Wann macht ein gemeinsamer Cache Sinn, wann separate?
+3. Was wären die Konsequenzen dieses Bugs in Produktion?
+
+---
+
 ## 🏆 Challenges
 
 Hast du Tag 6 durchgearbeitet? Teste dein Wissen:
